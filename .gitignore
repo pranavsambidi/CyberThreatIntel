@@ -1,0 +1,10 @@
+# Python and Virtual Environments
+venv/
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+
+# Large Database Files (Optional: keeps the repo lightweight)
+faiss_index/
