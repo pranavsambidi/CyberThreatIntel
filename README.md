@@ -1,4 +1,4 @@
-# 🛡️ Cyber Threat Intel (CTI) Analyst Suite
+# 🛡️ Cyber Threat Intel (CTI)
 
 ## Description
 An enterprise-grade hybrid search (Dense FAISS + Sparse BM25) Retrieval-Augmented Generation (RAG) pipeline. It allows SOC analysts to query unstructured PDF threat reports using Google's Gemini 2.5 Flash model and automatically extracts hard Indicators of Compromise (IOCs) via Regex.

@@ -32,7 +32,7 @@ if "GOOGLE_API_KEY" not in os.environ:
 @st.cache_resource
 def load_rag_pipeline():
     embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
-    vector_store = FAISS.load_local("./faiss_index", embeddings, allow_dangerous_deserialization=True)
+    vector_store = FAISS.load_local("./data/faiss_index", embeddings, allow_dangerous_deserialization=True)
     
     # 1. FAISS Retriever (Semantic Search - Great for concepts)
     faiss_retriever = vector_store.as_retriever(search_kwargs={"k": 5})

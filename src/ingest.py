@@ -9,13 +9,13 @@ from langchain_community.vectorstores import FAISS
 
 # 1. Configuration
 DATA_DIR = "./data"
-DB_DIR = "./faiss_index"
+DB_DIR = "./data/faiss_index"
 
 def process_pdfs():
     print("Starting Advanced CTI Document Ingestion...")
     
     # Grab all PDFs in the data folder
-    pdf_files = glob.glob(os.path.join(DATA_DIR, "*.pdf"))
+    pdf_files = glob.glob(os.path.join(DATA_DIR, "./data/*.pdf"))
     if not pdf_files:
         print("No PDFs found in the 'data' folder!")
         return
