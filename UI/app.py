@@ -26,12 +26,12 @@ def extract_iocs(text):
 # 2. RAG PIPELINE INITIALIZATION
 # ==========================================
 if "GOOGLE_API_KEY" not in os.environ:
-    st.error("⚠️ GOOGLE_API_KEY environment variable is not set. Please set it in your terminal.")
+    st.error("GOOGLE_API_KEY environment variable is not set. Please set it in your terminal.")
     st.stop()
 
 @st.cache_resource
 def load_rag_pipeline():
-    embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     vector_store = FAISS.load_local("./data/faiss_index", embeddings, allow_dangerous_deserialization=True)
     
     # 1. FAISS Retriever (Semantic Search - Great for concepts)

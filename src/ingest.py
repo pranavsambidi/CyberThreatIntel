@@ -1,85 +1,77 @@
 import os
 import glob
-import pymupdf4llm
 import time
-from langchain_core.documents import Document
+import pymupdf4llm
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
-
-# 1. Configuration
-DATA_DIR = "./data"
-DB_DIR = "./data/faiss_index"
+from langchain_core.documents import Document
 
 def process_pdfs():
     print("Starting Advanced CTI Document Ingestion...")
     
-    # Grab all PDFs in the data folder
-    pdf_files = glob.glob(os.path.join(DATA_DIR, "./data/*.pdf"))
+    # 1. Absolute Path Setup
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.path.join(BASE_DIR, "..", "data")
+    DB_DIR = os.path.join(DATA_DIR, "faiss_index")
+    
+    pdf_files = glob.glob(os.path.join(DATA_DIR, "*.pdf"))
+    
     if not pdf_files:
-        print("No PDFs found in the 'data' folder!")
+        print(f"No PDFs found in: {DATA_DIR}")
         return
 
-    all_documents = []
-
-    # 2. Advanced Extraction (Markdown Preservation)
-    for pdf_path in pdf_files:
-        filename = os.path.basename(pdf_path)
-        print(f"Extracting markdown from: {filename}")
-        
-        # This magically converts the PDF into Markdown, preserving IOC tables!
-        md_text = pymupdf4llm.to_markdown(pdf_path)
-        
-        # Store it as a LangChain Document with metadata for tracking
-        doc = Document(
-            page_content=md_text,
-            metadata={"source": filename}
-        )
-        all_documents.append(doc)
-
-    # 3. Intelligent Chunking
-    # 1000 characters with a 200 character (20%) overlap to prevent cutting IPs in half
-    print("\nChunking documents...")
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200,
-        separators=["\n\n", "\n", "|", " ", ""] # Respects markdown tables ("|")
-    )
+    print(f"Found {len(pdf_files)} PDFs. Extracting Markdown and chunking...")
     
-    chunks = text_splitter.split_documents(all_documents)
-    print(f"Created {len(chunks)} contextual chunks.")
+    all_chunks = []
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
-    # 4. Vectorization and FAISS Storage (WITH RATE LIMITING)
-    print("\n Generating Google text embeddings in batches (to respect Free Tier limits)...")
-    embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-001")    
-    # Process in batches of 50 to stay safely under the 100 requests/minute limit
-    BATCH_SIZE = 50
+    # 2. Extract & Chunk Phase
+    for i, pdf_path in enumerate(pdf_files):
+        filename = os.path.basename(pdf_path)
+        print(f"   -> Processing [{i+1}/{len(pdf_files)}]: {filename}")
+        try:
+            # Extract raw Markdown to preserve IOC tables
+            md_text = pymupdf4llm.to_markdown(pdf_path)
+            chunks = text_splitter.split_text(md_text)
+            
+            # Wrap chunks in Document objects with source metadata
+            for chunk in chunks:
+                all_chunks.append(Document(page_content=chunk, metadata={"source": filename}))
+        except Exception as e:
+            print(f"   Error processing {filename}: {e}")
+
+    print(f"\nExtraction Complete. Total vector chunks created: {len(all_chunks)}")
+    print("Initiating Google Gemini Embedding Phase...")
+    
+    # 3. Embed & Store Phase (with Rate Limiting)
+    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
     vector_store = None
-
-    for i in range(0, len(chunks), BATCH_SIZE):
-        batch = chunks[i : i + BATCH_SIZE]
-        print(f"   -> Processing batch {i // BATCH_SIZE + 1} (Chunks {i} to {i + len(batch)})...")
+    
+    BATCH_SIZE = 50 # Process 50 chunks at a time
+    
+    for i in range(0, len(all_chunks), BATCH_SIZE):
+        batch = all_chunks[i : i + BATCH_SIZE]
+        current_batch = (i // BATCH_SIZE) + 1
+        total_batches = (len(all_chunks) // BATCH_SIZE) + 1
         
-        # If it's the first batch, create the database
+        print(f"   -> Sending batch {current_batch}/{total_batches} to Gemini API...")
+        
         if vector_store is None:
             vector_store = FAISS.from_documents(batch, embeddings)
-        # For all subsequent batches, add to the existing database
         else:
             vector_store.add_documents(batch)
             
-        # If there are more chunks left to process, pause for 30 seconds
-        if i + BATCH_SIZE < len(chunks):
-            print(" Pausing for 30 seconds to respect API rate limits...")
+        # If we have more chunks left, sleep to prevent "Resource Exhausted" API errors
+        if i + BATCH_SIZE < len(all_chunks):
+            print("   Sleeping for 30 seconds to respect API rate limits...")
             time.sleep(30)
-    
-    # Save the completed database locally
+            
+    # 4. Save Database Phase
+    print("\nSaving local FAISS database...")
     vector_store.save_local(DB_DIR)
-    print(f"\n Success! FAISS vector database saved to '{DB_DIR}'.")
+    print(f"Success! Massive FAISS index built and saved to: {DB_DIR}")
 
+# This ensures the function runs when you execute the script
 if __name__ == "__main__":
-    # Ensure the API key is set
-    if "GOOGLE_API_KEY" not in os.environ:
-        print("ERROR: GOOGLE_API_KEY environment variable not found.")
-        print("Please set it using: export GOOGLE_API_KEY='your_key'")
-    else:
-        process_pdfs()
+    process_pdfs()
