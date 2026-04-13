@@ -6,7 +6,7 @@
 ![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4.svg)
 
 ## Project Overview
-ThreatRAG is an enterprise-grade, hybrid Retrieval-Augmented Generation (RAG) pipeline designed for Security Operations Centers (SOC). The system ingests unstructured, highly technical Cyber Threat Intelligence (CTI) advisories (such as CISA and Mandiant reports) and synthesizes actionable intelligence while completely mitigating Large Language Model (LLM) hallucinations.
+Cyber Threat Intel is an enterprise-grade, hybrid Retrieval-Augmented Generation (RAG) pipeline designed for Security Operations Centers (SOC). The system ingests unstructured, highly technical Cyber Threat Intelligence (CTI) advisories (such as CISA and Mandiant reports) and synthesizes actionable intelligence while completely mitigating Large Language Model (LLM) hallucinations.
 
 ## Key Features & Architecture
 * **Spatial-Aware Ingestion:** Utilizes `pymupdf4llm` to extract PDF text into Markdown, preserving the complex multi-column tabular structures where vital network indicators are typically stored.
@@ -16,7 +16,7 @@ ThreatRAG is an enterprise-grade, hybrid Retrieval-Augmented Generation (RAG) pi
 
 ## Repository Structure
 ```text
-ThreatRAG/
+Cyber Threat Intel/
 ├── data/                  # Raw CISA PDF advisories & local faiss_index database
 ├── notebooks/             # Jupyter notebooks for testing and RAG metric evaluation
 │   ├── setup.ipynb
