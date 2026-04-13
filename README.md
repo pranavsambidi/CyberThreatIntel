@@ -33,8 +33,8 @@ Cyber Threat Intel/
 ## Installation & Setup
 1. **Clone this repository:**
    ```bash
-   git clone [https://github.com/yourusername/ThreatRAG.git](https://github.com/yourusername/ThreatRAG.git)
-   cd ThreatRAG
+   git clone [https://github.com/pranavsambidi/CyberThreatIntel.git](https://github.com/pranavsambidi/CyberThreatIntel.git)
+   cd CyberThreatIntel
    ```
 2. **Create and activate a virtual environment:**
    ```bash
