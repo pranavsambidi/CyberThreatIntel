@@ -8,3 +8,5 @@ __pycache__/
 
 # Large Database Files (Optional: keeps the repo lightweight)
 faiss_index/
+
+.env
