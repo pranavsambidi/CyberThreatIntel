@@ -1,4 +1,3 @@
-```markdown
 # Cyber Threat Intel: Multimodal RAG for Threat Intelligence Synthesis
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
@@ -10,7 +9,7 @@
 ## Project Overview
 **Cyber Threat Intel** is an enterprise-grade, hybrid Retrieval-Augmented Generation (RAG) pipeline engineered for Security Operations Centers (SOC). The system resolves the unstructured data bottleneck by ingesting highly technical Cyber Threat Intelligence (CTI) advisories (such as CISA and Mandiant PDF reports) and synthesizing actionable intelligence while deterministically mitigating Large Language Model (LLM) hallucinations.
 
-## Key Features & Architecture (Deliverable 3 Upgrades)
+## Key Features & Architecture
 * **Hardware-Accelerated Local Vectorization:** Bypassed cloud API rate limits entirely by migrating to a locally hosted `BAAI/bge-large-en-v1.5` embedding model. Utilizing Apple Metal Performance Shaders (MPS), the system rapidly indexes dense vector spaces using unified memory.
 * **Hybrid Retrieval Index (FAISS + BM25):** Fuses dense semantic vectorization with sparse lexical retrieval. This ensures the system comprehends abstract behaviors (e.g., "living off the land") while retaining the ability to exact-match critical alphanumeric strings (e.g., "CVE-2023-4966" or cryptographic hashes).
 * **Automated IOC Extraction & SIEM Export:** A background Regular Expression (Regex) engine actively scrapes the AI's output for IPv4 addresses, SHA-256 hashes, CVEs, and MITRE ATT&CK codes. These are routed to dynamic Session State memory and can be exported as a CSV for immediate enterprise firewall deployment with one click.
