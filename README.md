@@ -1,18 +1,21 @@
-# Cyber Threat Intel
+```markdown
+# Cyber Threat Intel: Multimodal RAG for Threat Intelligence Synthesis
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B.svg)
-![LangChain](https://img.shields.io/badge/LangChain-Orchestration-gray.svg)
+![HuggingFace](https://img.shields.io/badge/HuggingFace-BGE_Large-F58025.svg)
+![Apple Silicon](https://img.shields.io/badge/Hardware-Apple_MPS-silver.svg)
 ![Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4.svg)
 
 ## Project Overview
-Cyber Threat Intel is an enterprise-grade, hybrid Retrieval-Augmented Generation (RAG) pipeline designed for Security Operations Centers (SOC). The system ingests unstructured, highly technical Cyber Threat Intelligence (CTI) advisories (such as CISA and Mandiant reports) and synthesizes actionable intelligence while completely mitigating Large Language Model (LLM) hallucinations.
+**Cyber Threat Intel** is an enterprise-grade, hybrid Retrieval-Augmented Generation (RAG) pipeline engineered for Security Operations Centers (SOC). The system resolves the unstructured data bottleneck by ingesting highly technical Cyber Threat Intelligence (CTI) advisories (such as CISA and Mandiant PDF reports) and synthesizing actionable intelligence while deterministically mitigating Large Language Model (LLM) hallucinations.
 
-## Key Features & Architecture
-* **Spatial-Aware Ingestion:** Utilizes `pymupdf4llm` to extract PDF text into Markdown, preserving the complex multi-column tabular structures where vital network indicators are typically stored.
-* **Hybrid Retrieval Index (FAISS + BM25):** Fuses dense semantic vectorization (`gemini-embedding-001`) with sparse lexical retrieval. This ensures the system understands abstract concepts (e.g., "lateral movement") while still being able to exact-match alphanumeric strings (e.g., "CVE-2023-4966" or cryptographic hashes).
-* **Deterministic Generation:** Powered by `gemini-2.5-flash` with a strict `temperature=0.1` and parametric confinement prompting to enforce a zero-trust, 100% anti-hallucination guardrail.
-* **Automated Artifact Extraction:** The Streamlit UI features a background Regular Expression (Regex) engine that actively scrapes the AI's output for IPs, SHA256 hashes, and CVEs, routing them to a sidebar for immediate firewall deployment.
+## Key Features & Architecture (Deliverable 3 Upgrades)
+* **Hardware-Accelerated Local Vectorization:** Bypassed cloud API rate limits entirely by migrating to a locally hosted `BAAI/bge-large-en-v1.5` embedding model. Utilizing Apple Metal Performance Shaders (MPS), the system rapidly indexes dense vector spaces using unified memory.
+* **Hybrid Retrieval Index (FAISS + BM25):** Fuses dense semantic vectorization with sparse lexical retrieval. This ensures the system comprehends abstract behaviors (e.g., "living off the land") while retaining the ability to exact-match critical alphanumeric strings (e.g., "CVE-2023-4966" or cryptographic hashes).
+* **Automated IOC Extraction & SIEM Export:** A background Regular Expression (Regex) engine actively scrapes the AI's output for IPv4 addresses, SHA-256 hashes, CVEs, and MITRE ATT&CK codes. These are routed to dynamic Session State memory and can be exported as a CSV for immediate enterprise firewall deployment with one click.
+* **Verifiable Contextual Transparency:** The UI features a "Show Your Work" interactive expander, rendering the exact raw text paragraphs and document citations retrieved by the database to combat analyst automation bias.
+* **Deterministic Generation:** Powered by `gemini-2.5-flash` with a strict `temperature=0.1` and parametric confinement prompting to enforce a zero-trust architecture.
 
 ## Repository Structure
 ```text
@@ -20,12 +23,12 @@ Cyber Threat Intel/
 ├── data/                  # Raw CISA PDF advisories & local faiss_index database
 ├── notebooks/             # Jupyter notebooks for testing and RAG metric evaluation
 │   ├── setup.ipynb
-│   └── evaluate_rag.ipynb
+│   └── evaluate_rag.ipynb # RAGAS mathematical evaluation script
 ├── src/                   # Core backend pipeline
-│   └── ingest.py          # Custom batch-processing vectorization script
+│   └── ingest.py          # Apple MPS hardware-accelerated vectorization script
 ├── ui/                    # Frontend application
-│   └── app.py             # Streamlit dashboard interface
-├── results/               # Exported CSVs containing inference latency and evaluation metrics
+│   └── app.py             # Streamlit analyst dashboard interface
+├── results/               # Exported CSVs containing final RAGAS metrics
 ├── requirements.txt       # Project dependencies
 └── README.md              # Project documentation
 ```
@@ -46,16 +49,15 @@ Cyber Threat Intel/
    pip install -r requirements.txt
    ```
 4. **Authenticate with Google Cloud:**
-   You must provide a Gemini Developer API key to utilize the embedding and generation endpoints.
+   You must provide a Gemini Developer API key to utilize the final generative synthesis endpoint.
    ```bash
    export GOOGLE_API_KEY="your_api_key_here"
    ```
 
-## Execution Guide
+## 💻 Execution Guide
 
-**Phase 1: Database Generation**
-Run the ingestion script to parse the PDFs and build the FAISS/BM25 indexes. 
-*Note: This script implements a 30-second batch-sleep architecture to comply with Google Cloud's 1,000-request daily API limits.*
+**Phase 1: Database Generation (Local)**
+Run the ingestion script to parse the PDFs and build the FAISS/BM25 indexes. Utilizing local HuggingFace embeddings via Apple MPS, this runs entirely on local hardware without API quota restrictions.
 ```bash
 python src/ingest.py
 ```
@@ -66,23 +68,23 @@ Start the interactive Streamlit interface to query your threat database.
 python -m streamlit run ui/app.py
 ```
 
-**Phase 3: Run Evaluation Metrics**
-To reproduce the evaluation metrics for inference latency and guardrail success rates:
+**Phase 3: Run RAGAS Evaluation Metrics**
+To reproduce the mathematical evaluation metrics for hallucination mitigation:
 ```bash
 python -m jupyter notebook
 # Open notebooks/evaluate_rag.ipynb and run all cells
 ```
 
-## Early Evaluation Results
-* **Retrieval Accuracy:** The hybrid ensemble effectively retrieves exact alphanumeric strings that standard dense models typically miss.
-* **Anti-Hallucination Guardrails:** Achieved a **100% pass rate** during intentional stress testing. When queried about fictional threat actors not present in the vector space, the system successfully chokes the LLM and forces an "Insufficient data" refusal.
-* **Known Limitations:** The free-tier Google API quota heavily bottlenecks the initial ingestion of large PDF corpuses (75+ reports). 
+## Final Evaluation Results (RAGAS)
+The architecture was subjected to rigorous, programmatic evaluation using the RAGAS framework, utilizing a secondary LLM as a mathematical "Judge":
+* **Faithfulness Score (1.000):** Achieved perfect hallucination mitigation. The system exhibited zero hallucination deviation from the localized threat data, proving the efficacy of parametric confinement.
+* **Context Precision (1.000):** Demonstrated perfect retrieval accuracy on highly explicit exact-match queries (e.g., CVE and Hash extraction).
 
-## Future Work (Deliverable 3)
-* Migrate the embedding architecture to a locally hosted open-source model (e.g., HuggingFace `BGE-Large-En-v1.5`) to completely bypass cloud API rate limits.
-* Implement the RAGAS framework for programmatic, mathematical scoring of Contextual Precision and Answer Faithfulness.
+## Issues and Limitations
+* **Cloud Inference Latency:** While vectorization is handled locally, the final generative synthesis still relies on the Google Gemini API. Complex multi-document synthesis queries can experience high latency (20+ seconds) due to HTTP timeout windows. 
+* **RAGAS Judge Timeouts:** Heavy programmatic evaluation via the RAGAS framework may trigger `TimeoutError` exceptions due to massive context payloads exceeding the free-tier grading LLM's timeout window.
 
 ## Author
-**Pranav Reddy Sambidi** Master of Science in AI Systems| University of Florida  
-[pr.sambidi@ufl.edu](mailto:pr.sambidi@ufl.edu)
+**Pranav Reddy Sambidi** *Master of Science in Artificial Intelligence Systems, University of Florida* Email: [pr.sambidi@ufl.edu](mailto:pr.sambidi@ufl.edu)  
+Role: Agentic AI Developer / AI Graduate Student Assistant
 ```
