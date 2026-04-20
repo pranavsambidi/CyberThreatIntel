@@ -1,14 +1,13 @@
 import os
 import glob
-import time
 import pymupdf4llm
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
 
 def process_pdfs():
-    print("Starting Advanced CTI Document Ingestion...")
+    print(" Starting Phase 3 Local CTI Document Ingestion...")
     
     # 1. Absolute Path Setup
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,10 +17,10 @@ def process_pdfs():
     pdf_files = glob.glob(os.path.join(DATA_DIR, "*.pdf"))
     
     if not pdf_files:
-        print(f"No PDFs found in: {DATA_DIR}")
+        print(f" No PDFs found in: {DATA_DIR}")
         return
 
-    print(f"Found {len(pdf_files)} PDFs. Extracting Markdown and chunking...")
+    print(f" Found {len(pdf_files)} PDFs. Extracting Markdown and chunking...")
     
     all_chunks = []
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
@@ -31,47 +30,31 @@ def process_pdfs():
         filename = os.path.basename(pdf_path)
         print(f"   -> Processing [{i+1}/{len(pdf_files)}]: {filename}")
         try:
-            # Extract raw Markdown to preserve IOC tables
             md_text = pymupdf4llm.to_markdown(pdf_path)
             chunks = text_splitter.split_text(md_text)
             
-            # Wrap chunks in Document objects with source metadata
             for chunk in chunks:
                 all_chunks.append(Document(page_content=chunk, metadata={"source": filename}))
         except Exception as e:
             print(f"   Error processing {filename}: {e}")
 
-    print(f"\nExtraction Complete. Total vector chunks created: {len(all_chunks)}")
-    print("Initiating Google Gemini Embedding Phase...")
+    print(f"\n Extraction Complete. Total vector chunks created: {len(all_chunks)}")
+    print(" Initiating Local HuggingFace Embedding Phase (BGE-Large)...")
     
-    # 3. Embed & Store Phase (with Rate Limiting)
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
-    vector_store = None
+    # 3. Local Embed & Store Phase (No API Limits!)
+    # We use BAAI/bge-large-en-v1.5, one of the highest-rated open-source RAG models
+    embeddings = HuggingFaceEmbeddings(
+    model_name="BAAI/bge-large-en-v1.5", 
+    model_kwargs={'device': 'mps'}
+    )
     
-    BATCH_SIZE = 50 # Process 50 chunks at a time
-    
-    for i in range(0, len(all_chunks), BATCH_SIZE):
-        batch = all_chunks[i : i + BATCH_SIZE]
-        current_batch = (i // BATCH_SIZE) + 1
-        total_batches = (len(all_chunks) // BATCH_SIZE) + 1
-        
-        print(f"   -> Sending batch {current_batch}/{total_batches} to Gemini API...")
-        
-        if vector_store is None:
-            vector_store = FAISS.from_documents(batch, embeddings)
-        else:
-            vector_store.add_documents(batch)
-            
-        # If we have more chunks left, sleep to prevent "Resource Exhausted" API errors
-        if i + BATCH_SIZE < len(all_chunks):
-            print("   Sleeping for 30 seconds to respect API rate limits...")
-            time.sleep(30)
+    print("   -> Vectorizing chunks using your Mac's CPU/RAM. This may take a few minutes...")
+    vector_store = FAISS.from_documents(all_chunks, embeddings)
             
     # 4. Save Database Phase
-    print("\nSaving local FAISS database...")
+    print("\n Saving local FAISS database...")
     vector_store.save_local(DB_DIR)
-    print(f"Success! Massive FAISS index built and saved to: {DB_DIR}")
+    print(f" Success! Unrestricted local FAISS index built and saved to: {DB_DIR}")
 
-# This ensures the function runs when you execute the script
 if __name__ == "__main__":
     process_pdfs()
