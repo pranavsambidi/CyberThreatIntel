@@ -53,7 +53,7 @@ Cyber Threat Intel/
    export GOOGLE_API_KEY="your_api_key_here"
    ```
 
-## 💻 Execution Guide
+## Execution Guide
 
 **Phase 1: Database Generation (Local)**
 Run the ingestion script to parse the PDFs and build the FAISS/BM25 indexes. Utilizing local HuggingFace embeddings via Apple MPS, this runs entirely on local hardware without API quota restrictions.
@@ -84,6 +84,7 @@ The architecture was subjected to rigorous, programmatic evaluation using the RA
 * **RAGAS Judge Timeouts:** Heavy programmatic evaluation via the RAGAS framework may trigger `TimeoutError` exceptions due to massive context payloads exceeding the free-tier grading LLM's timeout window.
 
 ## Author
-**Pranav Reddy Sambidi** *Master of Science in Artificial Intelligence Systems, University of Florida* Email: [pr.sambidi@ufl.edu](mailto:pr.sambidi@ufl.edu)  
-Role: Agentic AI Developer / AI Graduate Student Assistant
+**Pranav Reddy Sambidi** 
+*Master of Science in Artificial Intelligence Systems, University of Florida* 
+Email: [pr.sambidi@ufl.edu](mailto:pr.sambidi@ufl.edu)  
 ```
