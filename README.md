@@ -84,7 +84,7 @@ The architecture was subjected to rigorous, programmatic evaluation using the RA
 * **RAGAS Judge Timeouts:** Heavy programmatic evaluation via the RAGAS framework may trigger `TimeoutError` exceptions due to massive context payloads exceeding the free-tier grading LLM's timeout window.
 
 ## Author
-**Pranav Reddy Sambidi** //
-Master of Science in Artificial Intelligence Systems, University of Florida 
+**Pranav Reddy Sambidi**<br>
+Master of Science in Artificial Intelligence Systems, University of Florida<br>
 Email: [pr.sambidi@ufl.edu](mailto:pr.sambidi@ufl.edu)
 ```
