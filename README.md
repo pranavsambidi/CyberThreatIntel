@@ -82,9 +82,4 @@ The architecture was subjected to rigorous, programmatic evaluation using the RA
 ## Issues and Limitations
 * **Cloud Inference Latency:** While vectorization is handled locally, the final generative synthesis still relies on the Google Gemini API. Complex multi-document synthesis queries can experience high latency (20+ seconds) due to HTTP timeout windows. 
 * **RAGAS Judge Timeouts:** Heavy programmatic evaluation via the RAGAS framework may trigger `TimeoutError` exceptions due to massive context payloads exceeding the free-tier grading LLM's timeout window.
-
-## Author
-**Pranav Reddy Sambidi**<br>
-Master of Science in Artificial Intelligence Systems, University of Florida<br>
-Email: [pr.sambidi@ufl.edu](mailto:pr.sambidi@ufl.edu)
 ```
